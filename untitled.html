@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Pepper arrow 1</title>
+	<meta name="viewport" content="width=1280, user-scalable=no" />
+	<script type="text/javascript" src="snap.svg-min.js"></script>
+	<script type="text/javascript" src="../../robotutils.js"></script>
+	<script type="text/javascript" src="arrow.js"></script>
+
+
+	<style>
+	
+	body {
+		margin: 0;
+		border: 0;
+		padding: 0;
+		height: 99vh;
+	}
+	#svg_field {
+		margin: 0;
+		border: 0;
+		padding: 0;
+		width: 100%;
+		height: 100%;
+
+	}
+	
+	#map_img {
+		display: none;
+	}
+	</style>
+</head>
+<body>
+	<img id="map_img" href="kanada_map.png" draggable="false">
+	<svg id="svg_field" width="1280" height="1000" draggable="false"></svg>
+
+
+	<script type="text/javascript">
+		var snap = Snap("#svg_field");
+		var iv = {
+			x: 0,
+			y: 2,
+			width: 1280,
+			height: 795,
+		};
+		var image_view = snap.rect(iv.x, iv.y, iv.width, iv.height)
+							.attr({
+								stroke: "blue",
+								strokeWidth: 10,
+							});
+
+
+		//var polygon = snap.polyline(200, 286, 250, 200, 350, 200, 400, 286, 350, 373, 250, 373);
+		var position = snap.circle(10,10, 10).attr({fill: "red"});
+		console.log(position);
+;
+
+		//PRINTER
+		var printlog = [];
+		var printer = snap.text(10, 70, "Hello :)")
+		
+		function print(text) {
+			printlog.unshift("* "+text);
+			for ( var i = 1; i < printlog.length; i++ ) {
+			}
+			printer.attr({
+				text: printlog, 
+				fill: "red",
+       			})
+				.selectAll("tspan").forEach(function(tspan, i){
+      				tspan.attr({x:0+10, y:20*(i+1)+50});
+      				});
+
+		}
+
+
+
+		var arrow = {
+			step: 0,
+			stroke_width: 2,
+			stroke: "black",
+			tip_color: "red",
+			tip_width: 2,
+			start_color: "blue",
+			start_width: 5,
+		};
+		arrow.start_circ = snap.circle(-10, -10, 10).attr({fill: "blue"});
+		arrow.line = snap.line();
+		arrow.side1 = snap.line();
+		arrow.side2 = snap.line();
+
+		/*############### 
+		## IMAGE STUFF ##
+		###############*/
+
+		var img = snap.image('kanada_map.png')
+					.attr({id: "map"});
+		console.log(img.node);
+		width = document.getElementById("map").width;
+		console.log(width);
+		//var g = snap.group(img)
+		//g.transform("s0.5");
+		var scale = 0.5;
+
+		img.transform("s0.5T100,0");
+		var p = img.toPattern( 0,0, 1000, 600);
+		//var p = g.toPattern( 0,0, 400, 400);
+		image_view.attr({ fill: p });
+
+		function draw_position(e) {
+			position.attr({
+				cx: e.clientX,
+				cy: e.clientY
+
+			});
+		}
+
+
+		/*################
+		### MATH STUFF ###
+		#################*/
+
+		Math.degrees = function(radians) {
+			return radians * 180 / Math.PI;
+		};
+
+		getAngle = function() {
+	
+			var	dx = arrow.x2 - arrow.x1,
+				dy = arrow.y2 - arrow.y1;
+			//print("dx: "+dx+", dy: "+  dy)
+			
+			return Math.atan2(dy,dx);
+		};
+
+		function hypothenuse(x0, y0, x1, y1) {
+
+			var x = arrow.x2-arrow.x1;
+			var y = arrow.y2-arrow.y1;
+
+			var hypo = Math.sqrt(x*x+y*y);
+			console.log("hypo: ", hypo);
+			return hypo;
+
+
+		}
+
+		/*#######################
+		### Drawing the Arrow ###
+		#######################*/
+
+
+
+		function draw_arrow() {
+
+			// Basic variables
+			var a = arrow;
+			var line_length = hypothenuse(a.x1, a.y1, a.x2, a.y2);
+			var angle = getAngle();
+			angle = Math.degrees(angle);
+			//print("angle: "+ angle);
+			var side = Math.min(15, line_length/3);
+
+			// Position variables
+			var start = {
+				x: a.x1,
+				y: a.y1
+			};
+			var end = {
+				x: a.x1+line_length,
+				y: a.y1
+			};
+
+			// Drawing the lines
+			arrow.line.attr({ x1: start.x, y1: start.y, 
+							  x2: end.x, y2: end.y });
+			arrow.side1.attr({ x1: end.x-side, y1: end.y-side, 
+							   x2: end.x, y2: end.y });
+			arrow.side2.attr({x1: end.x-side, y1: end.y+side, 
+							  x2: end.x, y2: end.y});
+
+			// Group and rotate
+			g = snap.group(arrow.line, arrow.side1, arrow.side2);
+			g.attr({ stroke: a.stroke, strokeWidth: a.stroke_width });
+			g.transform("r"+angle+","+a.x1+","+a.y1);
+
+		}
+
+		function hide_arrow() {
+
+			var g = snap.group(arrow.line, arrow.side1, arrow.side2);
+			g.attr({stroke: "blue", strokeWidth: 0});
+		}
+
+		function arrow_start(event) {
+			////print("Start: " + event.clientX + "," + event.clientY);
+			arrow.x1 = event.clientX;
+			arrow.y1 = event.clientY;
+			arrow.start_circ.attr({cx: event.clientX, cy: event.clientY});
+			hide_arrow();
+		}
+		function arrow_end(event) {
+			arrow.x2 = event.changedTouches[0].clientX;
+			arrow.y2 = event.changedTouches[0].clientY;
+			draw_arrow();
+
+		}
+
+		function arrow_end_mouse(event) {
+			arrow.x2 = event.clientX;
+			arrow.y2 = event.clientY;
+			draw_arrow();
+		}
+
+		function set_arrow(e) {
+			console.log("set_arrow");
+			arrow.step += 1;
+
+			arrow.step = arrow.step % 2;
+			if (arrow.step == 0) {
+				arrow_start(e);
+			}
+			else if (arrow.step == 1){
+				arrow_end(e);
+			}
+		}
+	
+	image_view.mousedown(arrow_start);
+	image_view.mouseup(arrow_end_mouse)
+	image_view.touchmove(arrow_end);
+	image_view.touchend(arrow_end);
+
+
+
+	</script>
+</body>

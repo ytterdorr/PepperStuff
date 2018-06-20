@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Pepper Menu</title>
+	<script type="text/javascript" src="snap.svg-min.js"></script>
+
+	<style>
+	
+	body {
+		margin: 0;
+		border: 0;
+		padding: 0;
+	}
+	#svg_field {
+		margin: 0;
+		border: 0;
+		padding: 0;
+		width: 100vw;
+		height: 100vh;
+
+	}
+	</style>
+</head>
+<body>
+
+		<svg id="svg_field" width="1200" height="800"></svg>
+
+	<script type="text/javascript">
+		
+		var snap = Snap("#svg_field");
+		var field = document.getElementById("svg_field");
+		var background = snap.rect(0, 0, 1200, 800)
+								.attr({fill: "yellow"});
+		var arrow = {
+			stroke_width: 2,
+			stroke: "black",
+			tip_color: "red",
+			tip_width: 2,
+			start_color: "blue",
+			start_width: 5,
+		};
+
+		// Convert from radians to degrees.
+		Math.degrees = function(radians) {
+			return radians * 180 / Math.PI;
+		}
+		Math.getAngle = function( x1, y1, x2, y2 ) {
+	
+			var	dx = x2 - x1,
+				dy = y2 - y1;
+			
+			return Math.atan2(dy,dx);
+		};
+
+		function hypothenuse(x0, y0, x1, y1) {
+
+			let x = x1-x0;
+			let y = y1-y0;
+
+			let hypo = Math.sqrt(x*x+y*y);
+			console.log("hypo: ", hypo);
+			return hypo;
+
+
+		}
+
+		function draw_arrow1() {
+			let a = arrow;
+			let line_length = hypothenuse(a.x0, a.y0, a.x1, a.y1);
+			let angle = Math.getAngle(a.x0, a.y0, a.x1, a.y1);
+			angle = Math.degrees(angle)
+			console.log("angle: ", angle)
+			let side = Math.min(20, line_length/2);
+			let start = {
+				x: a.x0,
+				y: a.y0
+			};
+			let end = {
+				x: a.x0+line_length,
+				y: a.y0
+			};
+			let line = snap.line(start.x, start.y, end.x, end.y);
+			let side1 = snap.line(end.x-side, end.y-side, end.x, end.y);
+			let side2 = snap.line(end.x-side, end.y+side, end.x, end.y);
+			//let side2 = snap.line(x1-side, y+side, x1, arrow.y1);
+			var drawn_arrow = snap.group(line, side1, side2)
+									.attr({
+										stroke: "black",
+										stroke_width: 2
+									});
+
+			drawn_arrow.transform("r"+angle+","+a.x0+","+a.y0);
+		}
+
+		function draw_arrow(x0, y0, x1, y1) {
+			let a = arrow
+			arrow.line = snap.line(arrow.x0, arrow.y0, arrow.x1, arrow.y1)
+							.attr({
+						      stroke: arrow.stroke,
+						      strokeWidth: arrow.stroke_width
+						    });
+			arrow.tip = snap.circle(arrow.x1, arrow.y1, arrow.tip_width).attr({fill: arrow.tip_color})
+			arrow.transform("T0,r20")
+
+			
+			
+		};
+
+
+		function start_arrow(event) {
+			arrow.x0 = event.clientX;
+			arrow.y0 = event.clientY;
+			arrow.start_circ = snap.circle(arrow.x0, arrow.y0, arrow.start_width)
+										.attr({fill: "blue"});
+		}
+
+		function finish_arrow(event) {
+			arrow.x1 = event.clientX;
+			arrow.y1 = event.clientY;
+			console.log(arrow)
+			draw_arrow1()
+
+		}
+		
+
+		function draw_circle(event) {
+			x = event.clientX;
+			y = event.clientY;
+			rad = 20;
+			fill = "blue";
+			let c = snap.circle(x, y, rad)
+						  .attr({fill: fill});
+		}
+		background.mousedown(start_arrow);
+		background.mouseup(finish_arrow);
+		background.touchstart(start_arrow);
+		background.touchend(finish_arrow)
+		//background.click(draw_arrow);
+
+		//field.click(draw_arrow);
+
+		var objects = [];
+
+		var x=40, y=40, width=100, height=40, h_rad=10, v_rad=10;
+
+		red_button = snap.rect(x, y, width, height, h_rad, v_rad)
+			.attr({fill: "red"})
+			.click(button_action)
+			.touchstart(button_action);
+
+
+		draw_circle(100, 100)
+
+		function button_action() {
+			window.location.replace("https://www.google.com/")
+		}
+
+		function move_circle() {
+			console.log("move_circle")
+		}
+
+
+	</script>
+
+</body>
+</html>
