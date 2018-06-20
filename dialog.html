@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Tore Testar</title>
+	<script type="text/javascript" src="snap.svg-min.js"></script>
+    <script src="jquery-3.3.1.js" >></script>
+
+    <style type="text/css">
+
+    dialog {
+        width:50%;
+        background-color:
+        #F4FFEF;border:
+        1px black;
+    }
+    </style>
+</head>
+<body>
+
+<p> Hellu, this is tore testing</p>
+
+<img id="map" href="" />
+
+        <input type="file" accept="image/" />
+        <button>Open File Dialog</button>
+        <script>
+            $("button").on("click", function() {
+                $("input").trigger("click");
+            });
+            var fs = require('fs');
+var files = fs.readdirSync('/assets/photos/');
+        </script>
+
+<div>
+<dialog id="myFirstDialog">
+<p><q>The world is full of magical things patiently waiting for our wits to grow sharper.</q> - <cite>Bertrand Russell</cite></p>
+<button id="hide">Close</button>
+</dialog>
+<!-- "Show" button -->
+<button id="show">Show Dialog</button>
+</div>
+
+<!-- JavaScript to provide the "Show/Close" functionality -->
+<script type="text/JavaScript">
+(function() {  
+    var dialog = document.getElementById('myFirstDialog');  
+    document.getElementById('show').onclick = function() {  
+        dialog.show();  
+    };  
+    document.getElementById('hide').onclick = function() {  
+        dialog.close();  
+    };  
+})(); 
+</script>
+
+</body>
+</html>
